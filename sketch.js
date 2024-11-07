@@ -1,6 +1,7 @@
 let windowWidth = 800;
 let windowHeight = 800;
 let song, analyser;
+let flash = 0;
 let score = 0;
 let movingRect1, movingRect2, movingRect3;
 let moving = false;
@@ -12,6 +13,7 @@ let moving = false;
 
 function preload() {
     song = loadSound('assets/jazz.mp3');
+    noLoop;
 }
 
   function setup() {
@@ -46,7 +48,7 @@ function preload() {
     background(0);
     textSize(32);
     fill(255);
-    text("Press Spacebar to start the game", 0.5 * windowWidth, 0.9 * windowHeight);
+    text("Press Spacebar to start/pause game", 0.5 * windowWidth, 0.9 * windowHeight);
   }
 
   function playMusic() {
@@ -70,27 +72,19 @@ function keyPressed() {
     if (keyCode === 32) {
     moving = !moving;
       playMusic();
+    } else if (key === 's') {
+       hitBlock(0);
+    } else if (key === 'd') {
+      hitBlock(1);
+    } else if (key === 'f') {
+      keyIndex = 2;
     }
-  
-//     } else if (key === 's') {
-//       keyIndex = 0;
-//     } else if (key === 'd') {
-//       keyIndex = 1;
-//     } else if (key === 'f') {
-//       keyIndex = 2;
-//     }
   
 //     if (keyIndex !== undefined ) {
 //       activeKey[keyIndex] = true;
 //     }
 //   }
 
-//   function draw() {
-//     background(242, 242, 242);
-
-//     gameStart();
-//     drawBackground();
-//     drawBlock();
    }
   
   function drawBackground () {
@@ -204,6 +198,22 @@ function keyPressed() {
   }
  // }
 
+ function drawSquare() {
+    let yCircleX = [0.11, 0.86, 0.88];
+    let yCircleY = [0.25, 0.1, 0.68];
+    let yCircleR = [0.75, 0.1, 0.096];
+    let yCircleStroke = [18, 18, 14];
+
+    noFill();
+    stroke(231, 206, 52);
+    for (let i = 0; i< yCircleX.length; i++) {
+        strokeWeight(yCircleStroke[i]);
+        circle(yCircleX[i] * windowWidth, yCircleY[i] * windowHeight, yCircleR[i] + rms * windowWidth);
+        fill(170, 57, 46);
+        circle(yCircleX[i] * windowWidth, yCicrlceY[i] * windowHeight, yCircleR[i] + rms * windowWidth);
+    }
+ }
+
   function drawBlock() {
 
     console.log ('drawblock');
@@ -235,6 +245,10 @@ function keyPressed() {
   
       movingRect3.show();
       movingRect3.move();
+
+      if (movingRect1.missed() || movingRect2.missed() || movingRect3.missed()) {
+        score -=50;
+      }
   } else {
       movingRect1.show();
       movingRect2.show();
@@ -242,6 +256,24 @@ function keyPressed() {
   }
   }
   
+  // The following code is inspired by https://editor.p5js.org/Alexvargas000/sketches/WkER5h9r9
+  function hitBlock(keyIndex) {
+
+    if (keyIndex === 0 && movingRect1.y >= 0.85 * windowHeight && movingRect1.y <= 0.9 * windowHeight) {
+    score += 100;
+    movingRect1.hit = true;
+
+  } else if (keyIndex === 1 && movingRect2.y >= 0.85 * windowHeight && movingRect1.y <= 0.90 * windowHeight) {
+    score += 100;
+    movingRect2.hit = true;
+
+  } else if (keyIndex === 2 && movingRect3.y >= 0.85 * windowHeight && movingRect1.y <= 0.9 * windowHeight) {
+    score += 100;
+    movingRect3.hit = true;
+  }
+  }
+
+
   class Block {
     constructor(x, y, width, height, colorVal) {
       this.x = x;
@@ -263,5 +295,13 @@ function keyPressed() {
         if (this.y > 0.86 * windowHeight) {
             this.y = this.initialY;
         }
+    }
+
+    OffscreenCanvas() {
+        return this.y > 0.945 * windowHeight;
+    }
+
+    missed() {
+        return this.y > 0.945 * windowHeight && !this.pressed;
     }
   }
