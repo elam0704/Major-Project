@@ -2,6 +2,8 @@ let windowWidth = 800;
 let windowHeight = 800;
 let song, analyser;
 let score = 0;
+let movingRect1, movingRect2, movingRect3;
+let moving = false;
 
   function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
@@ -18,13 +20,26 @@ function preload() {
     rectMode(CENTER);
     textSize(32); // Move textSize() here
 
-   // dropTime = (height - 100) / 5;
-
     analyser = new p5.Amplitude();
     analyser.setInput(song);
 
-   // let button = createButton('Start Game');
-   // button.mousePressed(gameStart);
+    dropTime = (height - 100) / 5; //5 is the speed of the notes
+
+    movingRect1 = new Block(0.3 * windowWidth, 0.1 * windowWidth, 0.065 * windowWidth, 0.01 * windowHeight, color(170, 57, 46));
+    movingRect2 = new Block(0.45 * windowWidth, 0.4 * windowHeight, 0.06 * windowWidth, 0.01 * windowHeight, color(231, 206, 52));
+    movingRect3 = new Block(0.7 * windowWidth, 0.3 * windowHeight, 0.083 * windowWidth, 0.01 * windowHeight, color(60, 88, 151));
+
+
+  }
+
+  function draw() {
+    background(242, 242, 242);
+
+    gameStart();
+    drawBackground();
+    drawBlock();
+
+    dropBlock();
   }
 
   function gameStart() {
@@ -53,28 +68,30 @@ function preload() {
 function keyPressed() {
     let keyIndex;
     if (keyCode === 32) {
+    moving = !moving;
       playMusic();
-  
-    } else if (key === 's') {
-      keyIndex = 0;
-    } else if (key === 'd') {
-      keyIndex = 1;
-    } else if (key === 'f') {
-      keyIndex = 2;
     }
   
-    if (keyIndex !== undefined ) {
-      activeKey[keyIndex] = true;
-    }
-  }
+//     } else if (key === 's') {
+//       keyIndex = 0;
+//     } else if (key === 'd') {
+//       keyIndex = 1;
+//     } else if (key === 'f') {
+//       keyIndex = 2;
+//     }
+  
+//     if (keyIndex !== undefined ) {
+//       activeKey[keyIndex] = true;
+//     }
+//   }
 
-  function draw() {
-    background(242, 242, 242);
+//   function draw() {
+//     background(242, 242, 242);
 
-    gameStart();
-    drawBackground();
-    drawBlock();
-  }
+//     gameStart();
+//     drawBackground();
+//     drawBlock();
+   }
   
   function drawBackground () {
     // flash = flash + 1
@@ -93,7 +110,7 @@ function keyPressed() {
     let xStarts = [0, 0, 0.85];
     let yPositions = [0.86, 0.95, 0.03];
     let horizontalStrokes = [16, 16, 18];
-    let xLength = [1, 1, 0.42]
+    let xLength = [1, 1, 0.42];
 
     for (let i = 0; i < yPositions.length; i++) {
         strokeWeight(horizontalStrokes[i]);
@@ -199,8 +216,52 @@ function keyPressed() {
     rect(0.7 * windowWidth, 0.26 * windowHeight, 0.09 * windowWidth, 0.16 * windowHeight);
   }
 
-  function drawScore() {
+  function drawScore () {
     fill(255);
     textSize(32);
     text(`Score: ${score}`, width / 2, 60);
+  }
+
+  //dropBlock() is by ChatGPT, so that the rectangles doesn't drop in a pile. However, the reason why the rectangle did not drop as desired is also because I did not define the background.
+  //I still decided to keep this code because it is cleaner and I like the effect better than the one I did before.
+  function dropBlock() {
+
+    if (moving) {
+      movingRect1.show();
+      movingRect1.move();
+  
+      movingRect2.show();
+      movingRect2.move();
+  
+      movingRect3.show();
+      movingRect3.move();
+  } else {
+      movingRect1.show();
+      movingRect2.show();
+      movingRect3.show();
+  }
+  }
+  
+  class Block {
+    constructor(x, y, width, height, colorVal) {
+      this.x = x;
+      this.y = y;
+      this.width = width;
+      this.height = height;
+      this.colorVal = colorVal;
+      this.yspeed = random(3,5) //yspeed;
+      this.initialY = y;
+    }
+  
+    show() {
+      fill(this.colorVal);
+      rect(this.x, this.y, this.width, this.height);
+  }
+  
+    move() {
+        this.y += this.yspeed;
+        if (this.y > 0.86 * windowHeight) {
+            this.y = this.initialY;
+        }
+    }
   }
