@@ -1,3 +1,4 @@
+// Declare variables
 let windowWidth = 800;
 let windowHeight = 800;
 let song, analyser;
@@ -11,6 +12,7 @@ let hitLine = false;
 let keyIndex = -1;
 let scoreIncrement = false;
 let pageIndex = 0;
+let gameRun = false;
 
   function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
@@ -19,42 +21,89 @@ let pageIndex = 0;
 
 function preload() {
     song = loadSound('assets/jazz.mp3');
-    //noLoop;
+    img = loadImage('assets/p3.jpg');
 }
 
   function setup() {
     createCanvas(windowWidth, windowHeight);
     textAlign(CENTER, CENTER);
     rectMode(CENTER);
-    textSize(32); // Move textSize() here
+    textSize(32); 
 
     analyser = new p5.Amplitude();
     analyser.setInput(song);
 
-   // dropTime = (height - 100) / 5; //5 is the speed of the notes
-
-    movingRect1 = new Block(0.28 * windowWidth, 0.1 * windowWidth, 0.065 * windowWidth, 0.01 * windowHeight, color(170, 57, 46), random(3));
+    //Droping Blocks
+    movingRect1 = new Block(0.28 * windowWidth, 0.1 * windowWidth, 0.065 * windowWidth, 0.01 * windowHeight, color(170, 57, 46), random(3, 5));
     movingRect2 = new Block(0.45 * windowWidth, 0.4 * windowHeight, 0.06 * windowWidth, 0.01 * windowHeight, color(231, 206, 52), random(3));
-    movingRect3 = new Block(0.7 * windowWidth, 0.3 * windowHeight, 0.083 * windowWidth, 0.01 * windowHeight, color(60, 88, 151), random(3));
+    movingRect3 = new Block(0.7 * windowWidth, 0.3 * windowHeight, 0.083 * windowWidth, 0.01 * windowHeight, color(60, 88, 151), random(2, 5));
+
+    //Change page index when song ends
+    song.onended(() => {
+        pageIndex++;
+    });
 
 
   }
 
   function draw() {
-    background(0);
+    background(255);
 
-    gameStart();
-    drawBackground();
-    drawBlock();
-    dropBlock();
-    hitBlock(keyIndex);
+    // Determine which page to show according to the page index
+    if (pageIndex === 0) {
+        pageOne();
+    } else if (pageIndex === 1) {
+        pageTwo();
+    } else {
+        pageThree();
+    }
+ }
 
+ //Calling all functions in each page
+    function pageOne() {
+        background(255);
+        gameStart();
+        drawScore();
+        drawLines();
+        drawCircle();
+        drawBlock();
+        dropBlock();
+        stroke(170, 57, 46);
+        hitBlock(keyIndex);
   }
 
-  function gameStart() {
+  function pageTwo() {
+
+    if (!song.isPlaying()) {
+        song.play();
+    }
+
     background(0);
-    textSize(32);
     fill(255);
+    noStroke();
+    text("s              d                    f ", 0.49 *windowWidth, 0.9 * windowHeight);
+    drawScore();
+    drawLines();
+    drawSquare();
+    drawBlock();
+    dropBlock();
+    stroke(255);
+    hitBlock(keyIndex);
+  }
+
+  function pageThree() {
+    image(img, 0, 0);
+    noStroke();
+    textSize(32);
+    text(`Final score:`, 0.39 * windowWidth, 0.26 * windowHeight);
+    text(`${score}`, 0.72 * windowWidth, 0.77 * windowHeight);
+  }
+
+  //A function to load first page
+  function gameStart() {
+    textSize(32);
+    fill(60, 88, 151);
+    noStroke();
     if (showGame) {
     text("Press Spacebar to start/pause game", 0.5 * windowWidth, 0.9 * windowHeight); 
 } else if (startPress) {
@@ -62,31 +111,39 @@ function preload() {
   }
 } 
 
+function drawScore() {
+    textSize(32);
+    text(`Score: ${score}`, width / 2, 60);
+}
+
   function playMusic() {
     if (song.isPlaying()) {
         song.stop();
     } else {
-        song.loop();
+        song.play();
     }
 }
  
 function keyPressed() {
-   // let keyIndex;
+  
     if (keyCode === 32) {
-    moving = !moving;
+    moving = !moving; //checking if the block is dropping
       playMusic();
+      if(!gameRun) { 
+        gameRun = true;
+      } else {playMusic()}
       showGame = false;
       startPress = true;
 
     } else if (key === 's') {
         hitLine = true;
         keyIndex = 0;
-       hitBlock(0);
+        hitBlock(0);
 
     } else if (key === 'd') {
         hitLine = true;
         keyIndex = 1;
-      hitBlock(1);
+        hitBlock(1);
 
     } else if (key === 'f') {
       hitLine = true;
@@ -101,21 +158,8 @@ function keyReleased() {
     scoreIncrement = false;
 }
   
-//     if (keyIndex !== undefined ) {
-//       activeKey[keyIndex] = true;
-//     }
-//   }
 
-  
-  function drawBackground () {
-    // flash = flash + 1
-
-    drawScore();
-    drawLines();
-    drawCircle();
-  }
-
-  function drawLines() {
+function drawLines() {
     stroke(231, 206, 52);
     strokeCap(SQUARE)
 
@@ -143,102 +187,46 @@ function keyReleased() {
     }
   }
 
-    function drawCircle() {
-        let rms = analyser.getLevel();
+function drawCircle() {
+    let rms = analyser.getLevel();
 
-    // Blue Circle
-    let bCircleX = [0.08, 0.14];
-    let bCircleY = [0.089, 0.73];
-    let bCircleR = [0.042, 0.095];
-    let bCircleStroke = [8, 18];
+    let bCircleX = [0.08, 0.14, 0.098, 0.83, 0.885, 0.11, 0.86, 0.88]; //x-axis
+    let bCircleY = [0.089, 0.73, 0.46, 0.45, 0.3, 0.25, 0.1, 0.68]; // y-axis
+    let bCircleR = [0.042, 0.095, 0.068, 0.065, 0.04, 0.075, 0.1, 0.096]; //radius
+    let bCircleStroke = [8, 18, 16, 6, 11, 18, 18, 14]; 
+    let iColor = [color('#445897'),color('#445897'),color('#aa392e'),color('#aa392e '),color('#aa392e'),color('#e7ce34'),color('#e7ce34'),color('#e7ce34')];
 
-     //Flashing effect is inspired by https://editor.p5js.org/doubleshow/sketches/BJdU6tFSM
-//     if (flash % 50 === 0) {
-//     noFill();
-//     stroke(255); //Blue
-//    for (let i = 0; i < bCircleX.length; i++) {
- //       strokeWeight(bCircleStroke[i]);
- //       ellipse(bCircleX[i] * windowWidth, bCircleY[i] * windowHeight, bCircleR[i] * windowWidth);
-    
-// }
-//     else {
     noFill();
-    stroke(60, 88, 151); //Blue
+    
     for (let i = 0; i < bCircleX.length; i++) {
         strokeWeight(bCircleStroke[i]);
-        ellipse(bCircleX[i] * windowWidth, bCircleY[i] * windowHeight, bCircleR[i] + rms * windowWidth);
+        stroke(iColor[i]);
+        ellipse(bCircleX[i] * windowWidth, bCircleY[i] * windowHeight, bCircleR[i] + rms * windowWidth); //rms = allow circle to react with the music
     }
-   // }
+}
 
- // Red Circle
-    let rCircleX = [0.098, 0.83, 0.885];
-    let rCircleY = [0.46, 0.45, 0.3];
-    let rCircleR = [0.068, 0.065, 0.04];
-    let rCircleStroke = [16, 6, 11];
-
-//     if (flash % 20 === 0) {
-//     noFill();
-//     stroke(255);  //Red
-//     for (let i = 0; i < rCircleX.length; i++) {
-//         strokeWeight(rCircleStroke[i]);
-//         ellipse(rCircleX[i] * windowWidth, rCircleY[i] * windowHeight, rCircleR[i] * windowWidth);
-//     }
-//   } else {
-    noFill();
-    stroke(170, 57, 46);  //Red
-    for (let i = 0; i < rCircleX.length; i++) {
-        strokeWeight(rCircleStroke[i]);
-        ellipse(rCircleX[i] * windowWidth, rCircleY[i] * windowHeight, rCircleR[i] + rms * windowWidth);
-    }
-  // }
-
-    // Yellow Circle
-    let yCircleX = [0.11, 0.86, 0.88];
-    let yCircleY = [0.25, 0.1, 0.68];
-    let yCircleR = [0.075, 0.1, 0.096];
-    let yCircleStroke = [18, 18, 14];
-
-//     if (flash % 15 === 0) {
-//     noFill();
-//     stroke(255);  //Yellow
-//     for (let i = 0; i < yCircleX.length; i++) {
-//         strokeWeight(yCircleStroke[i]);
-//         ellipse(yCircleX[i] * windowWidth, yCircleY[i] * windowHeight, yCircleR[i] * windowWidth);
-//     }
-//   } else {
-    noFill();
-    stroke(231, 206, 52);  //Yellow
-    for (let i = 0; i < yCircleX.length; i++) {
-      strokeWeight(yCircleStroke[i]);
-      circle(yCircleX[i] * windowWidth, yCircleY[i] * windowHeight, yCircleR[i] + rms * windowWidth);
-      fill(170, 57, 46);
-      circle(yCircleX[i] * windowWidth, yCircleY[i] * windowHeight, yCircleR[i] + rms * windowWidth);
-    }
-  }
- // }
 
  function drawSquare() {
     let rms = analyser.getLevel();
 
     let ySqrX = [0.11, 0.86, 0.88];
     let ySqrY = [0.25, 0.1, 0.68];
-    let ySqrR = [0.75, 0.1, 0.096];
-   // let yCircleStroke = [18, 18, 14];
+    let ySqr = [0.01, 0.02, 0.096];
+    let iColor = [color('#445897'),color('#aa392e'),color('#aa392e '),color('#e7ce34')];
+    let sqrStroke = [16, 6, 6, 12];
 
-    // noFill();
-    // stroke(231, 206, 52);
     for (let i = 0; i< ySqrX.length; i++) {
-       // strokeWeight(yCircleStroke[i]);
-        fill(0);
-        square(ySqrX[i] * windowWidth, ySqrY[i] * windowHeight, ySqrR[i] + rms * windowWidth);
-        // fill(170, 57, 46);
-        // circle(yCircleX[i] * windowWidth, yCicrlceY[i] * windowHeight, yCircleR[i] + rms * windowWidth);
+       strokeWeight(3);
+       stroke(iColor[i]);
+       strokeWeight(sqrStroke[i]);
+       noFill();
+       square(ySqrX[i] * windowWidth, ySqrY[i] * windowHeight, ySqr[i] + rms * windowWidth);
     }
  }
 
+ //function for dropping blocks.
   function drawBlock() {
 
-    console.log ('drawblock');
     noStroke();
     fill(170, 57, 46); //Red
     rect(0.28 * windowWidth, 0.1 * windowHeight, 0.07 * windowWidth, 0.11 * windowHeight);
@@ -246,12 +234,6 @@ function keyReleased() {
     rect(0.45 * windowWidth, 0.45 * windowHeight, 0.06 * windowWidth, 0.22 * windowHeight);
     fill(60, 88, 151); //Blue
     rect(0.7 * windowWidth, 0.26 * windowHeight, 0.09 * windowWidth, 0.16 * windowHeight);
-  }
-
-  function drawScore () {
-    fill(255);
-    textSize(32);
-    text(`Score: ${score}`, width / 2, 60);
   }
 
   //dropBlock() is by ChatGPT, so that the rectangles doesn't drop in a pile. However, the reason why the rectangle did not drop as desired is also because I did not define the background.
@@ -268,9 +250,9 @@ function keyReleased() {
       movingRect3.show();
       movingRect3.move();
 
-    //   if (movingRect1.missed() || movingRect2.missed() || movingRect3.missed()) {
-    //     score -=50;
-    //   }
+ if (movingRect1.missed() || movingRect2.missed() || movingRect3.missed()) {
+    score -=50;
+  }
 
   } else {
       movingRect1.show();
@@ -279,9 +261,9 @@ function keyReleased() {
   }
   }
 
+  //A double-line that would react when user pressed on the S D F keys for user feedback.
   function highlight() {
     if (hitLine) {
-        stroke(255);
         strokeWeight(6);
         line(0 * windowWidth, 0.848 * windowHeight, 1 * windowWidth, 0.848 * windowHeight);
         line(0 * window, 0.873 * windowHeight, 1 * windowWidth, 0.873 * windowHeight);
@@ -291,17 +273,24 @@ function keyReleased() {
   // The following code is inspired by https://editor.p5js.org/Alexvargas000/sketches/WkER5h9r9
   function hitBlock(keyIndex) {
 
-    if (keyIndex === 0 && movingRect1.y >= 0.85 * windowHeight && movingRect1.y <= 0.9 * windowHeight && !scoreIncrement) {
-    score += 100;
-    movingRect1.hit = true;
+    //Set up the hit range for dropping blocks.
+    if (keyIndex === 0 && movingRect1.y >= 0.86 * windowHeight && movingRect1.y <= 0.88 * windowHeight && !scoreIncrement) {
+    score += 100; //score system
+    scoreIncrement = true;
+    movingRect1.y = 0.95 * windowHeight; //once the user catches the dropping blocks within the range, the y position of the block will immediately set to the bottom of the screen (end of screen).
+    movingRect1.hide();
 
-  } else if (keyIndex === 1 && movingRect2.y >= 0.85 * windowHeight && movingRect1.y <= 0.90 * windowHeight && !scoreIncrement) {
-    score += 100;
-    movingRect2.hit = true;
-
-  } else if (keyIndex === 2 && movingRect3.y >= 0.85 * windowHeight && movingRect1.y <= 0.9 * windowHeight && !scoreIncrement) {
+  } else if (keyIndex === 1 && movingRect2.y >= 0.86 * windowHeight && movingRect1.y <= 0.88 * windowHeight && !scoreIncrement) {
     score += 100;
     scoreIncrement = true;
+    movingRect2.y = 0.95 * windowHeight;
+    movingRect2.hide();
+
+  } else if (keyIndex === 2 && movingRect3.y >= 0.86 * windowHeight && movingRect1.y <= 0.88 * windowHeight && !scoreIncrement) {
+    score += 100;
+    scoreIncrement = true;
+    movingRect3.y = 0.95 * windowHeight;
+    movingRect3.hide();
   }
   highlight();
   }
@@ -314,8 +303,9 @@ function keyReleased() {
       this.width = width;
       this.height = height;
       this.colorVal = colorVal;
-      this.yspeed = yspeed; //random(3,5) //yspeed;
+      this.yspeed = yspeed; 
       this.initialY = y;
+      this.offScreen = true;
     }
   
     show() {
@@ -330,12 +320,12 @@ function keyReleased() {
         }
     }
 
-    // OffscreenCanvas() {
-    //     return this.y > 0.945 * windowHeight;
-    // }
-
+    //miss range - when the dropping block reached the bottom yellow line, it will be considered a missed catch
     missed() {
-        return this.y > 0.95 * windowHeight;
-        //&& !this.pressed;
+        return this.y > 0.9467 * windowHeight; // the number needs to be set very specifically to stop multiple score deduction. 
     }
-  }
+    
+    hide() {
+        this.offScreen = true;
+    }
+}
