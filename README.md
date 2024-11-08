@@ -14,8 +14,8 @@
 
 ###### I've always been a fan of rhythm games, like *Magic Tiles* and *Taiko no Tatsujin: Pop Tap Beat*, which inspire my concept. With influences from both these games and Mondrian's work, I aim to create a rhythm game where blocks drop from the three main elements in the centre, challenging the user to catch them in time.
 
-![Taiko no Tatsujin: Pop Tap Beat](Taiko.PNG)
-![Magic Tiles](MagicTiles.PNG)
+![Taiko no Tatsujin: Pop Tap Beat](assets/Taiko.PNG)
+![Magic Tiles](assets/MagicTiles.PNG)
 
 ## Technical Explanation
 ###### Most of the group code is changed for my design, as my idea has shifted while thinking about the structure of the game. However, I remain the concept of for loops and arrays for most the components introduced later in the code.
