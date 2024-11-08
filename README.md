@@ -32,3 +32,7 @@
 
 #### Dropping blocks
 ###### The animated dropping block is achieved through a class where it defines the position, size, colour and speed. In terms of the interaction, once the user catches the dropping block within the hit range, it will disappear achieved by hide() at the end of the code. The dropping block has to disappear if user have caught the block, this is to prevent the clock from continuing to fall past the hit range, which would trigger a missed condition and reduce the score inaccurately.
+
+## Reference
+###### Music from https://pixabay.com/music/search/boogie-woogie/ by Denis-Pavlov-Music
+#### AI Declaration: There are situations when I used ChatGPT for some minor problems. For example, when I couldn't figure out what the problem is in the code, and I did use some of its suggestions (view details in the sketch file).
