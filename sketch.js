@@ -5,6 +5,12 @@ let flash = 0;
 let score = 0;
 let movingRect1, movingRect2, movingRect3;
 let moving = false;
+let showGame = true;
+let startPress = false;
+let hitLine = false;
+let keyIndex = -1;
+let scoreIncrement = false;
+let pageIndex = 0;
 
   function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
@@ -13,7 +19,7 @@ let moving = false;
 
 function preload() {
     song = loadSound('assets/jazz.mp3');
-    noLoop;
+    //noLoop;
 }
 
   function setup() {
@@ -25,31 +31,36 @@ function preload() {
     analyser = new p5.Amplitude();
     analyser.setInput(song);
 
-    dropTime = (height - 100) / 5; //5 is the speed of the notes
+   // dropTime = (height - 100) / 5; //5 is the speed of the notes
 
-    movingRect1 = new Block(0.3 * windowWidth, 0.1 * windowWidth, 0.065 * windowWidth, 0.01 * windowHeight, color(170, 57, 46));
-    movingRect2 = new Block(0.45 * windowWidth, 0.4 * windowHeight, 0.06 * windowWidth, 0.01 * windowHeight, color(231, 206, 52));
-    movingRect3 = new Block(0.7 * windowWidth, 0.3 * windowHeight, 0.083 * windowWidth, 0.01 * windowHeight, color(60, 88, 151));
+    movingRect1 = new Block(0.28 * windowWidth, 0.1 * windowWidth, 0.065 * windowWidth, 0.01 * windowHeight, color(170, 57, 46), random(3));
+    movingRect2 = new Block(0.45 * windowWidth, 0.4 * windowHeight, 0.06 * windowWidth, 0.01 * windowHeight, color(231, 206, 52), random(3));
+    movingRect3 = new Block(0.7 * windowWidth, 0.3 * windowHeight, 0.083 * windowWidth, 0.01 * windowHeight, color(60, 88, 151), random(3));
 
 
   }
 
   function draw() {
-    background(242, 242, 242);
+    background(0);
 
     gameStart();
     drawBackground();
     drawBlock();
-
     dropBlock();
+    hitBlock(keyIndex);
+
   }
 
   function gameStart() {
     background(0);
     textSize(32);
     fill(255);
-    text("Press Spacebar to start/pause game", 0.5 * windowWidth, 0.9 * windowHeight);
+    if (showGame) {
+    text("Press Spacebar to start/pause game", 0.5 * windowWidth, 0.9 * windowHeight); 
+} else if (startPress) {
+    text("s              d                    f ", 0.49 *windowWidth, 0.9 * windowHeight);
   }
+} 
 
   function playMusic() {
     if (song.isPlaying()) {
@@ -58,38 +69,46 @@ function preload() {
         song.loop();
     }
 }
-
-//   function gameStart() {
-//     if (song.isPlaying()) {
-//         song.stop();
-//     } else {
-//         song.loop();
-//     }
-// }
  
 function keyPressed() {
-    let keyIndex;
+   // let keyIndex;
     if (keyCode === 32) {
     moving = !moving;
       playMusic();
+      showGame = false;
+      startPress = true;
+
     } else if (key === 's') {
+        hitLine = true;
+        keyIndex = 0;
        hitBlock(0);
+
     } else if (key === 'd') {
+        hitLine = true;
+        keyIndex = 1;
       hitBlock(1);
+
     } else if (key === 'f') {
+      hitLine = true;
       keyIndex = 2;
+      hitBlock(2);
     }
+}
+
+function keyReleased() {
+    hitLine = false;
+    keyIndex = -1;
+    scoreIncrement = false;
+}
   
 //     if (keyIndex !== undefined ) {
 //       activeKey[keyIndex] = true;
 //     }
 //   }
 
-   }
   
   function drawBackground () {
     // flash = flash + 1
-
 
     drawScore();
     drawLines();
@@ -199,18 +218,21 @@ function keyPressed() {
  // }
 
  function drawSquare() {
-    let yCircleX = [0.11, 0.86, 0.88];
-    let yCircleY = [0.25, 0.1, 0.68];
-    let yCircleR = [0.75, 0.1, 0.096];
-    let yCircleStroke = [18, 18, 14];
+    let rms = analyser.getLevel();
 
-    noFill();
-    stroke(231, 206, 52);
-    for (let i = 0; i< yCircleX.length; i++) {
-        strokeWeight(yCircleStroke[i]);
-        circle(yCircleX[i] * windowWidth, yCircleY[i] * windowHeight, yCircleR[i] + rms * windowWidth);
-        fill(170, 57, 46);
-        circle(yCircleX[i] * windowWidth, yCicrlceY[i] * windowHeight, yCircleR[i] + rms * windowWidth);
+    let ySqrX = [0.11, 0.86, 0.88];
+    let ySqrY = [0.25, 0.1, 0.68];
+    let ySqrR = [0.75, 0.1, 0.096];
+   // let yCircleStroke = [18, 18, 14];
+
+    // noFill();
+    // stroke(231, 206, 52);
+    for (let i = 0; i< ySqrX.length; i++) {
+       // strokeWeight(yCircleStroke[i]);
+        fill(0);
+        square(ySqrX[i] * windowWidth, ySqrY[i] * windowHeight, ySqrR[i] + rms * windowWidth);
+        // fill(170, 57, 46);
+        // circle(yCircleX[i] * windowWidth, yCicrlceY[i] * windowHeight, yCircleR[i] + rms * windowWidth);
     }
  }
 
@@ -219,7 +241,7 @@ function keyPressed() {
     console.log ('drawblock');
     noStroke();
     fill(170, 57, 46); //Red
-    rect(0.3 * windowWidth, 0.1 * windowHeight, 0.07 * windowWidth, 0.11 * windowHeight);
+    rect(0.28 * windowWidth, 0.1 * windowHeight, 0.07 * windowWidth, 0.11 * windowHeight);
     fill(231, 206, 52); //Yellow
     rect(0.45 * windowWidth, 0.45 * windowHeight, 0.06 * windowWidth, 0.22 * windowHeight);
     fill(60, 88, 151); //Blue
@@ -246,42 +268,53 @@ function keyPressed() {
       movingRect3.show();
       movingRect3.move();
 
-      if (movingRect1.missed() || movingRect2.missed() || movingRect3.missed()) {
-        score -=50;
-      }
+    //   if (movingRect1.missed() || movingRect2.missed() || movingRect3.missed()) {
+    //     score -=50;
+    //   }
+
   } else {
       movingRect1.show();
       movingRect2.show();
       movingRect3.show();
   }
   }
+
+  function highlight() {
+    if (hitLine) {
+        stroke(255);
+        strokeWeight(6);
+        line(0 * windowWidth, 0.848 * windowHeight, 1 * windowWidth, 0.848 * windowHeight);
+        line(0 * window, 0.873 * windowHeight, 1 * windowWidth, 0.873 * windowHeight);
+    }
+  }
   
   // The following code is inspired by https://editor.p5js.org/Alexvargas000/sketches/WkER5h9r9
   function hitBlock(keyIndex) {
 
-    if (keyIndex === 0 && movingRect1.y >= 0.85 * windowHeight && movingRect1.y <= 0.9 * windowHeight) {
+    if (keyIndex === 0 && movingRect1.y >= 0.85 * windowHeight && movingRect1.y <= 0.9 * windowHeight && !scoreIncrement) {
     score += 100;
     movingRect1.hit = true;
 
-  } else if (keyIndex === 1 && movingRect2.y >= 0.85 * windowHeight && movingRect1.y <= 0.90 * windowHeight) {
+  } else if (keyIndex === 1 && movingRect2.y >= 0.85 * windowHeight && movingRect1.y <= 0.90 * windowHeight && !scoreIncrement) {
     score += 100;
     movingRect2.hit = true;
 
-  } else if (keyIndex === 2 && movingRect3.y >= 0.85 * windowHeight && movingRect1.y <= 0.9 * windowHeight) {
+  } else if (keyIndex === 2 && movingRect3.y >= 0.85 * windowHeight && movingRect1.y <= 0.9 * windowHeight && !scoreIncrement) {
     score += 100;
-    movingRect3.hit = true;
+    scoreIncrement = true;
   }
+  highlight();
   }
 
 
   class Block {
-    constructor(x, y, width, height, colorVal) {
+    constructor(x, y, width, height, colorVal, yspeed) {
       this.x = x;
       this.y = y;
       this.width = width;
       this.height = height;
       this.colorVal = colorVal;
-      this.yspeed = random(3,5) //yspeed;
+      this.yspeed = yspeed; //random(3,5) //yspeed;
       this.initialY = y;
     }
   
@@ -292,16 +325,17 @@ function keyPressed() {
   
     move() {
         this.y += this.yspeed;
-        if (this.y > 0.86 * windowHeight) {
+        if (this.y > 0.95 * windowHeight) {
             this.y = this.initialY;
         }
     }
 
-    OffscreenCanvas() {
-        return this.y > 0.945 * windowHeight;
-    }
+    // OffscreenCanvas() {
+    //     return this.y > 0.945 * windowHeight;
+    // }
 
     missed() {
-        return this.y > 0.945 * windowHeight && !this.pressed;
+        return this.y > 0.95 * windowHeight;
+        //&& !this.pressed;
     }
   }
